@@ -1,7 +1,8 @@
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { ArrowRight, Calendar, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Navbar } from './components/Navbar';
+import { CalendlyModal } from './components/CalendlyModal';
 import { DeviceShowcase } from './components/DeviceShowcase';
 import { ProblemFitStrip } from './components/ProblemFitStrip';
 import { Trust } from './components/Trust';
@@ -33,9 +34,14 @@ const FaqSection = lazy(() =>
 const ProjectBriefSection = lazy(() =>
   import('./components/ProjectBriefSection').then((m) => ({ default: m.ProjectBriefSection })),
 );
-const CalendlyModal = lazy(() =>
-  import('./components/CalendlyModal').then((m) => ({ default: m.CalendlyModal })),
-);
+
+declare global {
+  interface Window {
+    dataLayer?: Record<string, unknown>[];
+    gtag?: (...args: unknown[]) => void;
+    clarity?: (...args: unknown[]) => void;
+  }
+}
 
 export default function App() {
   const { t, language } = useLanguage();
@@ -58,7 +64,35 @@ export default function App() {
     setToast({ id: Date.now(), title, description });
   };
 
+  useEffect(() => {
+    const handleCalendlyMessage = (e: MessageEvent) => {
+      if (e.origin !== 'https://calendly.com' || !e.data || typeof e.data !== 'object') {
+        return;
+      }
+      const eventName = (e.data as { event?: string; payload?: unknown }).event;
+      if (eventName === 'calendly.event_scheduled') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'strategy_call_booked',
+          calendly_event: (e.data as { payload?: unknown }).payload,
+        });
+        window.gtag?.('event', 'strategy_call_booked');
+        window.clarity?.('event', 'strategy_call_booked');
+      } else if (eventName === 'calendly.date_and_time_selected') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ event: 'calendly_time_selected' });
+        window.clarity?.('event', 'calendly_time_selected');
+      }
+    };
+
+    window.addEventListener('message', handleCalendlyMessage);
+    return () => window.removeEventListener('message', handleCalendlyMessage);
+  }, []);
+
   const openCalendly = (prefill?: { name?: string; email?: string }) => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'booking_modal_opened' });
+    window.clarity?.('event', 'booking_modal_opened');
     setCalendlyPrefill(prefill ?? {});
     setCalendlyOpen(true);
   };
@@ -401,14 +435,12 @@ export default function App() {
         <ScrollToTop />
         <SuccessToast toast={toast} onDismiss={() => setToast(null)} />
         {calendlyOpen && (
-          <Suspense fallback={null}>
-            <CalendlyModal
-              open={calendlyOpen}
-              onClose={handleCloseCalendly}
-              prefill={calendlyPrefill}
-              contextLabel={t.modal.contextLabel(activeTier.name, activeTier.priceDisplay)}
-            />
-          </Suspense>
+          <CalendlyModal
+            open={calendlyOpen}
+            onClose={handleCloseCalendly}
+            prefill={calendlyPrefill}
+            contextLabel={t.modal.contextLabel(activeTier.name, activeTier.priceDisplay)}
+          />
         )}
       </div>
     </MotionConfig>

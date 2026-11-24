@@ -49,6 +49,11 @@
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
+.calendly-overlay {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

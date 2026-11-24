@@ -71,6 +71,8 @@ export const KIRALYTE_CONTACT = {
 
 export function buildCalendlyEmbedUrl(prefill?: { name?: string; email?: string }): string {
   const params = new URLSearchParams({
+    embed_domain: typeof window !== 'undefined' ? window.location.hostname : 'www.kiralyte.com',
+    embed_type: 'Inline',
     hide_gdpr_banner: '1',
     primary_color: 'ea580c',
     text_color: '181c20',

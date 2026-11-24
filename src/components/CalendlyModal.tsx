@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, ExternalLink, X } from 'lucide-react';
 import { buildCalendlyEmbedUrl, KIRALYTE_CONTACT } from '../data/kiralyteData';
 import { useLanguage } from '../i18n/translations';
@@ -21,14 +22,17 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({
 }) => {
   const { t } = useLanguage();
   const [loaded, setLoaded] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setLoaded(false);
+      setSlowLoad(false);
       return;
     }
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const slowTimer = window.setTimeout(() => setSlowLoad(true), 4000);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -36,22 +40,27 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.clearTimeout(slowTimer);
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
   const embedUrl = buildCalendlyEmbedUrl(prefill);
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="calendly-modal-title"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#181C20]/70 backdrop-blur-xs"
-      onClick={onClose}
+      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-[#181C20]/70 backdrop-blur-xs"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
       <div
         className="bg-white rounded-t-3xl sm:rounded-2xl max-w-3xl w-full h-[92dvh] sm:h-[85vh] max-h-[780px] flex flex-col overflow-hidden border-t sm:border border-[#181C20]/12 shadow-2xl"
@@ -109,9 +118,14 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({
                 href={KIRALYTE_CONTACT.calendlyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-semibold text-[#C2410C] underline underline-offset-2"
+                className={
+                  slowLoad
+                    ? 'inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#EA580C] text-white text-xs font-semibold hover:bg-[#C2410C] transition-colors'
+                    : 'text-xs font-semibold text-[#C2410C] underline underline-offset-2'
+                }
               >
-                {t.modal.openDirectPrompt}
+                <span>{t.modal.openDirectPrompt}</span>
+                {slowLoad && <ExternalLink className="w-3.5 h-3.5" />}
               </a>
             </div>
           )}
@@ -120,6 +134,7 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({
             title={t.modal.title}
             src={embedUrl}
             onLoad={() => setLoaded(true)}
+            allow="payment"
             className="w-full h-full border-0"
           />
         </div>
@@ -138,6 +153,7 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({
           </a>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
