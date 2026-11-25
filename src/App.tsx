@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Calendar, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Navbar } from './components/Navbar';
@@ -7,6 +7,11 @@ import { DeviceShowcase } from './components/DeviceShowcase';
 import { ProblemFitStrip } from './components/ProblemFitStrip';
 import { Trust } from './components/Trust';
 import { CapabilitiesSection } from './components/CapabilitiesSection';
+import { PortfolioSection } from './components/PortfolioSection';
+import { TestimonialCarousel } from './components/TestimonialCarousel';
+import { PricingSection } from './components/PricingSection';
+import { FaqSection } from './components/FaqSection';
+import { ProjectBriefSection } from './components/ProjectBriefSection';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
@@ -18,22 +23,6 @@ import { OfferCountdown } from './components/OfferCountdown';
 import { TrustIndicators } from './components/TrustIndicators';
 import { CaseStudy, KIRALYTE_CONTACT } from './data/kiralyteData';
 import { useLanguage } from './i18n/translations';
-
-const PortfolioSection = lazy(() =>
-  import('./components/PortfolioSection').then((m) => ({ default: m.PortfolioSection })),
-);
-const TestimonialCarousel = lazy(() =>
-  import('./components/TestimonialCarousel').then((m) => ({ default: m.TestimonialCarousel })),
-);
-const PricingSection = lazy(() =>
-  import('./components/PricingSection').then((m) => ({ default: m.PricingSection })),
-);
-const FaqSection = lazy(() =>
-  import('./components/FaqSection').then((m) => ({ default: m.FaqSection })),
-);
-const ProjectBriefSection = lazy(() =>
-  import('./components/ProjectBriefSection').then((m) => ({ default: m.ProjectBriefSection })),
-);
 
 declare global {
   interface Window {
@@ -381,50 +370,48 @@ export default function App() {
             <CapabilitiesSection onStartProject={scrollToBrief} />
           </ScrollReveal>
 
-          <Suspense fallback={<div className="min-h-[420px] bg-[#F6F7F9]" aria-hidden="true" />}>
-            <ScrollReveal offsetY={20}>
-              <PortfolioSection
-                activeModalStudyId={activeModalStudyId}
-                onOpenStudy={(study) => setActiveModalStudyId(study.id)}
-                onCloseStudy={() => setActiveModalStudyId(null)}
-                onBuildSimilar={handleBuildSimilar}
-              />
-            </ScrollReveal>
+          <ScrollReveal offsetY={20}>
+            <PortfolioSection
+              activeModalStudyId={activeModalStudyId}
+              onOpenStudy={(study) => setActiveModalStudyId(study.id)}
+              onCloseStudy={() => setActiveModalStudyId(null)}
+              onBuildSimilar={handleBuildSimilar}
+            />
+          </ScrollReveal>
 
-            <ScrollReveal offsetY={20}>
-              <TestimonialCarousel onBookCall={() => openCalendly()} />
-            </ScrollReveal>
+          <ScrollReveal offsetY={20}>
+            <TestimonialCarousel onBookCall={() => openCalendly()} />
+          </ScrollReveal>
 
-            <ScrollReveal offsetY={20}>
-              <PricingSection
-                selectedTierId={selectedTierId}
-                selectedAddonIds={selectedAddonIds}
-                onSelectTier={setSelectedTierId}
-                onToggleAddon={handleToggleAddon}
-                onLockQuote={scrollToBrief}
-                onBookCall={() => openCalendly()}
-              />
-            </ScrollReveal>
+          <ScrollReveal offsetY={20}>
+            <PricingSection
+              selectedTierId={selectedTierId}
+              selectedAddonIds={selectedAddonIds}
+              onSelectTier={setSelectedTierId}
+              onToggleAddon={handleToggleAddon}
+              onLockQuote={scrollToBrief}
+              onBookCall={() => openCalendly()}
+            />
+          </ScrollReveal>
 
-            <ScrollReveal offsetY={20}>
-              <FaqSection onBookCall={() => openCalendly()} />
-            </ScrollReveal>
+          <ScrollReveal offsetY={20}>
+            <FaqSection onBookCall={() => openCalendly()} />
+          </ScrollReveal>
 
-            <ScrollReveal offsetY={16}>
-              <Trust />
-            </ScrollReveal>
+          <ScrollReveal offsetY={16}>
+            <Trust />
+          </ScrollReveal>
 
-            <ScrollReveal offsetY={20}>
-              <ProjectBriefSection
-                selectedTierId={selectedTierId}
-                selectedAddonIds={selectedAddonIds}
-                referenceStudyName={referenceStudyName}
-                onSelectTier={setSelectedTierId}
-                onBookCall={(prefill) => openCalendly(prefill)}
-                onBriefSubmitted={handleBriefSubmitted}
-              />
-            </ScrollReveal>
-          </Suspense>
+          <ScrollReveal offsetY={20}>
+            <ProjectBriefSection
+              selectedTierId={selectedTierId}
+              selectedAddonIds={selectedAddonIds}
+              referenceStudyName={referenceStudyName}
+              onSelectTier={setSelectedTierId}
+              onBookCall={(prefill) => openCalendly(prefill)}
+              onBriefSubmitted={handleBriefSubmitted}
+            />
+          </ScrollReveal>
         </main>
 
         <Footer />

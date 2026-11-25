@@ -38,7 +38,7 @@ export const ProjectBriefSection: React.FC<ProjectBriefSectionProps> = ({
   const { t, language } = useLanguage();
   const [conversionTab, setConversionTab] = useState<'calendly' | 'brief'>('calendly');
   const [inlineCalendarLoaded, setInlineCalendarLoaded] = useState(false);
-  const [shouldLoadCalendar, setShouldLoadCalendar] = useState(false);
+  const [shouldLoadCalendar, setShouldLoadCalendar] = useState(true);
   const calendarContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

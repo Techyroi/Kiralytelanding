@@ -41,8 +41,7 @@
 }
 
 .cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 640px;
+  /* Keep all sections painted and visible at all times (prevents hidden sections in mobile WebViews & Clarity) */
 }
 
 .pb-safe {
